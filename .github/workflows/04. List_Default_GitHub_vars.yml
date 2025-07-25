@@ -1,4 +1,4 @@
-name: List all default GitHub Vars
+name: 04. List all default GitHub Vars
 
 on:
   workflow_dispatch:
