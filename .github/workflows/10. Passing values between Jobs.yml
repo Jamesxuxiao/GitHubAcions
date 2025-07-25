@@ -1,29 +1,34 @@
 name: '10. Passing Values to Next Jobs'
 
-on:  workflow_dispatch
+on: workflow_dispatch  # Manual trigger for this workflow
 
 jobs:
-
   job1:
-    runs-on: windows-latest
-    
-    # Map a step output to a job output
+    runs-on: windows-latest  # This job runs on a Windows runner
+
+    # These are job-level outputs, mapped from step outputs
     outputs:
-      output1: ${{ steps.step1.outputs.test }}
-      output2: ${{ steps.step2.outputs.test }}
+      output1: ${{ steps.step1.outputs.test }}  # Set output1 from step1's output named 'test'
+      output2: ${{ steps.step2.outputs.test }}  # Set output2 from step2's output named 'test'
 
     steps:
+      # Step 1: Set an output variable 'test' with value 'ImportantValue1'
       - id: step1
-        run: echo "::set-output name=test::ImportantValue1"
+        shell: bash  # Use bash shell for compatibility with GITHUB_OUTPUT syntax
+        run: echo "test=ImportantValue1" >> $GITHUB_OUTPUT  # Write to $GITHUB_OUTPUT to define step output
+
+      # Step 2: Set another output variable 'test' with a different value
       - id: step2
-        run: echo "::set-output name=test::ImportantValue2"
-  
-  
+        shell: bash
+        run: echo "test=ImportantValue2" >> $GITHUB_OUTPUT
+
   job2:
-    runs-on: ubuntu-latest
-    needs: job1
+    runs-on: ubuntu-latest  # This job runs on a Linux runner
+    needs: job1  # This job depends on 'job1' and can access its outputs
+
     steps:
+      # Step: Access and print the outputs from 'job1'
       - run: |
           echo "Printing the values"
-          echo output1: ${{needs.job1.outputs.output1}}
-          echo output2: ${{needs.job1.outputs.output2}}
+          echo "output1: ${{ needs.job1.outputs.output1 }}"  # Prints value from job1.step1
+          echo "output2: ${{ needs.job1.outputs.output2 }}"  # Prints value from job1.step2
